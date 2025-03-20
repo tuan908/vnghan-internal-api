@@ -1,0 +1,15 @@
+{
+  "error": {
+    "invalidFile": "File không hợp lệ",
+    "invalidFileType": "Loại file không hợp lệ",
+    "invalidFileSize": "Kích thước file không hợp lệ",
+    "invalidFileExtension": "Phần mở rộng file không hợp lệ",
+    "unknownError": "Đã xảy ra lỗi không xác định",
+    "internalServerError": "Lỗi máy chủ",
+    "notFound": "Không tìm thấy dữ liệu",
+    "operate": "Có lỗi xảy ra khi thao tác dữ liệu!",
+    "noValidRows": "Dữ liệu không hợp lệ"
+  },
+  "title": { "notification": "Thông báo" },
+  "successOperation": "Thao tác thành công!"
+}
