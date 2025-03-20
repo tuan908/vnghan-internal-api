@@ -103,15 +103,15 @@ screwRouter
   })
   .patch("/:id", async (c) => {
     const db = c.get("db");
-    const { id } = c.req.param();
+    const body = await c.req.json<ScrewDto>();
 
-    const result = await db
-      .update(SCHEMA.SCREW)
-      .set({ isDeleted: true })
-      .where(eq(SCHEMA.SCREW.id, Number(id)))
-      .returning();
+    const [screw] = await db
+      .select()
+      .from(SCHEMA.SCREW)
+      .where(eq(SCHEMA.SCREW.id, body.id!))
+      .limit(1);
 
-    if (!result.length) {
+    if (!screw) {
       return c.json(
         createErrorResponse({
           code: ErrorCodes.NOT_FOUND,
@@ -122,7 +122,40 @@ screwRouter
       );
     }
 
-    return c.json(createSuccessResponse({ data: result[0] }), 200);
+    screw.name = body.name!;
+    screw.note = body.note!;
+    screw.price = body.price!;
+    screw.quantity = body.quantity!;
+
+    const [material] = await db
+      .select()
+      .from(SCHEMA.SCREW_MATERIAL)
+      .where(eq(SCHEMA.SCREW_MATERIAL.name, body.material!))
+      .limit(1);
+
+    if (!material) {
+      return;
+    }
+    screw.materialId = material.id;
+
+    const [result] = await db
+      .update(SCHEMA.SCREW)
+      .set(screw)
+      .where(eq(SCHEMA.SCREW.id, screw.id))
+      .returning();
+
+    if (!result) {
+      return c.json(
+        createErrorResponse({
+          code: ErrorCodes.BAD_REQUEST,
+          message: json.error.operate,
+          statusCode: 400,
+        }),
+        400
+      );
+    }
+
+    return c.json(createSuccessResponse({ data: result }), 200);
   })
   .get("/types", async (c) => {
     const db = c.get("db");
