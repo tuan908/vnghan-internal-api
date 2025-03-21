@@ -1,21 +1,21 @@
 import {
-  DEFAULT_MATERIAL_ID,
-  DEFAULT_SIZE_ID,
-  DEFAULT_TYPE_ID,
-  ErrorCodes,
-  PAGE_SIZE,
+    DEFAULT_MATERIAL_ID,
+    DEFAULT_SIZE_ID,
+    DEFAULT_TYPE_ID,
+    ErrorCodes,
+    PAGE_SIZE,
 } from "@/constants";
 import json from "@/i18n/locales/vi.json";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api-response";
-import { invalidateRedisCache } from "@/lib/cache";
+import { invalidateCache } from "@/lib/cache";
 import DbSchema from "@/lib/db";
 import { nullsToUndefined } from "@/lib/utils";
 import type { TScrewDto } from "@/lib/validations";
 import type {
-  IEnvironment,
-  IScrewMaterialDto,
-  IScrewTypeDto,
-  TServerCreateScrewDto,
+    IEnvironment,
+    IScrewMaterialDto,
+    IScrewTypeDto,
+    TServerCreateScrewDto,
 } from "@/types";
 import { eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
@@ -106,7 +106,7 @@ screwRouterV2
       materialId: screwMaterial.id,
     };
 
-    await invalidateRedisCache(REDIS_URL, REDIS_TOKEN, `GET:/api/v2/screws`);
+    await invalidateCache(REDIS_URL, REDIS_TOKEN, `GET:/api/v2/screws`);
     const result = await db.insert(DbSchema.Screw).values(entity).execute();
     return c.json(createSuccessResponse({ data: result }), 200);
   })
@@ -165,7 +165,7 @@ screwRouterV2
       );
     }
 
-    await invalidateRedisCache(
+    await invalidateCache(
       REDIS_URL,
       REDIS_TOKEN,
       `GET:/api/v2/screws/${body.id!}`
@@ -210,7 +210,7 @@ screwRouterV2
       );
     }
 
-    await invalidateRedisCache(
+    await invalidateCache(
       REDIS_URL,
       REDIS_TOKEN,
       `GET:/api/v2/screws/${body.id!}`

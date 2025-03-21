@@ -8,7 +8,7 @@ import type { IEnvironment } from "../types";
  * Create a Hono middleware for database access using Neon's HTTP client
  * which is better suited for serverless environments like Cloudflare Workers
  */
-export const createDatabaseMiddleware = (
+export const createDatabaseMiddlewareFactory = (
   connectionStringOverride?: string
 ): MiddlewareHandler<{
   Bindings: IEnvironment;

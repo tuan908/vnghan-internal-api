@@ -118,7 +118,7 @@ export function decodeBody(bodyString: string): ArrayBuffer {
 }
 
 // Cache invalidation helper
-export const invalidateRedisCache = (
+export const invalidateCache = (
   redisUrl: string,
   redisToken: string,
   pattern?: string,
