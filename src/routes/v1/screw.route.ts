@@ -40,20 +40,20 @@ screwRouterV1
         id: DbSchema.Screw.id,
         name: DbSchema.Screw.name,
         quantity: DbSchema.Screw.quantity,
-        componentType: DbSchema.Screw.name,
-        material: DbSchema.Screw.name,
-        category: DbSchema.Screw.name,
+        componentType: DbSchema.ScrewType.name,
+        material: DbSchema.ScrewMaterial.name,
+        category: DbSchema.ScrewType.name,
         price: DbSchema.Screw.price,
         note: DbSchema.Screw.note,
       })
       .from(DbSchema.Screw)
       .innerJoin(
-        DbSchema.Screw,
-        eq(DbSchema.Screw.materialId, DbSchema.Screw.id)
+        DbSchema.ScrewMaterial,
+        eq(DbSchema.Screw.materialId, DbSchema.ScrewMaterial.id)
       )
       .innerJoin(
-        DbSchema.Screw,
-        eq(DbSchema.Screw.componentTypeId, DbSchema.Screw.id)
+        DbSchema.ScrewType,
+        eq(DbSchema.Screw.componentTypeId, DbSchema.ScrewType.id)
       )
       .where(eq(DbSchema.Screw.isDeleted, false))
       .orderBy(DbSchema.Screw.id);
