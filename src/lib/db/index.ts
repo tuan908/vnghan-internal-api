@@ -3,11 +3,11 @@ import { screws } from "./schema/screw";
 import { screwSizes } from "./schema/size";
 import { screwTypes } from "./schema/type";
 
-const SCHEMA = {
-  SCREW: screws,
-  SCREW_TYPE: screwTypes,
-  SCREW_SIZE: screwSizes,
-  SCREW_MATERIAL: screwMaterials
+const DbSchema = {
+  Screw: screws,
+  ScrewType: screwTypes,
+  ScrewSize: screwSizes,
+  ScrewMaterial: screwMaterials
 }
 
-export default SCHEMA
+export default DbSchema

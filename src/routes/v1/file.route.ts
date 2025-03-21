@@ -1,15 +1,17 @@
 import { DEFAULT_MATERIAL_ID, DEFAULT_SIZE_ID, ErrorCodes } from "@/constants";
 import json from "@/i18n/locales/vi.json";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api-response";
-import SCHEMA from "@/lib/db";
-import { ImportResult, ScrewEntity } from "@/types";
+import { invalidateRedisCache } from "@/lib/cache";
+import DbSchema from "@/lib/db";
+import type { IEnvironment, IImportResult, TScrewEntity } from "@/types";
 import { inArray } from "drizzle-orm";
 import { type Row, Workbook } from "exceljs";
 import { Hono } from "hono";
+import { env } from "hono/adapter";
 
-const fileRouter = new Hono();
+const fileRouterV1 = new Hono<{ Bindings: IEnvironment }>();
 
-fileRouter
+fileRouterV1
   .post("/excel", async (c) => {
     const db = c.get("db");
 
@@ -19,6 +21,7 @@ fileRouter
   })
   .post("/pdf", async (c) => {})
   .post("/importExcel", async (c) => {
+    const { REDIS_TOKEN, REDIS_URL } = env(c);
     const db = c.get("db");
 
     try {
@@ -42,7 +45,7 @@ fileRouter
       const workbook = new Workbook();
       await workbook.xlsx.load(fileBuffer);
 
-      const rows: ScrewEntity[] = [];
+      const rows: TScrewEntity[] = [];
       const errors: string[] = [];
 
       // Fetch all screw types & materials beforehand for fast lookups
@@ -50,16 +53,16 @@ fileRouter
 
       const [screwTypes, materials] = await Promise.all([
         db
-          .select({ name: SCHEMA.SCREW_TYPE.name, id: SCHEMA.SCREW_TYPE.id })
-          .from(SCHEMA.SCREW_TYPE)
-          .where(inArray(SCHEMA.SCREW_TYPE.name, worksheetNames)),
+          .select({ name: DbSchema.ScrewType.name, id: DbSchema.ScrewType.id })
+          .from(DbSchema.ScrewType)
+          .where(inArray(DbSchema.ScrewType.name, worksheetNames)),
 
         db
           .select({
-            name: SCHEMA.SCREW_MATERIAL.name,
-            id: SCHEMA.SCREW_MATERIAL.id,
+            name: DbSchema.ScrewMaterial.name,
+            id: DbSchema.ScrewMaterial.id,
           })
-          .from(SCHEMA.SCREW_MATERIAL),
+          .from(DbSchema.ScrewMaterial),
       ]);
 
       // Convert DB data into maps for quick lookup
@@ -79,7 +82,7 @@ fileRouter
           1000
         ); // Limit processing
 
-        const worksheetRows: ScrewEntity[] = [];
+        const worksheetRows: TScrewEntity[] = [];
 
         for (let i = startRow; i <= usedRowCount; i++) {
           const row = worksheet.getRow(i);
@@ -140,15 +143,17 @@ fileRouter
 
       // **Optimized Bulk Insert** (Uses ON CONFLICT DO NOTHING)
       const insertQuery = db
-        .insert(SCHEMA.SCREW)
+        .insert(DbSchema.Screw)
         .values(rows)
         .onConflictDoNothing()
         .returning();
 
       const result = await insertQuery;
 
+      await invalidateRedisCache(REDIS_URL, REDIS_TOKEN, `GET:/api/v1/screws`);
+
       return c.json(
-        createSuccessResponse<ImportResult>({
+        createSuccessResponse<IImportResult>({
           rowsCount: result.length || rows.length,
         }),
         200
@@ -178,4 +183,4 @@ function getCellValue(row: Row, cellIndex: number): string | undefined {
   return value.toString().trim();
 }
 
-export default fileRouter;
+export default fileRouterV1;

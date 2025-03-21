@@ -8,7 +8,9 @@
     "no_handle_cross_request_promise_resolution"
   ],
   "vars": {
-    "DATABASE_URL": "postgresql://tuan908:ch4PFt5iGABb@ep-wandering-fog-71031792-pooler.ap-southeast-1.aws.neon.tech/vnghan-internal?sslmode=require"
+    "DATABASE_URL": "postgresql://tuan908:ch4PFt5iGABb@ep-wandering-fog-71031792-pooler.ap-southeast-1.aws.neon.tech/vnghan-internal?sslmode=require",
+    "REDIS_URL": "https://select-satyr-54572.upstash.io",
+    "REDIS_TOKEN": "AdUsAAIjcDE4Mzc5NDZmNzQxNDU0NDNiOTEyOTdlYzc5MDMwMzcwZXAxMA"
   },
   "observability": {
     "enabled": true,

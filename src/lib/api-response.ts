@@ -1,15 +1,15 @@
-import { ApiResponse, PaginationInfo, ValidationError } from "@/types";
+import type { IApiResponse, IPaginationInfo, IValidationError } from "@/types";
 
 // Create a successful response
-export function createSuccessResponse<T>(
-  data: T,
+export function createSuccessResponse<TData>(
+  data: TData,
   options?: {
     code?: number;
     message?: string;
     requestId?: string;
-    pagination?: PaginationInfo;
+    pagination?: IPaginationInfo;
   }
-): ApiResponse<T> {
+): IApiResponse<TData> {
   return {
     success: true,
     status: {
@@ -30,10 +30,10 @@ export function createErrorResponse(
     message: string;
     details?: unknown;
     statusCode?: number;
-    errors?: ValidationError[];
+    errors?: IValidationError[];
   },
   requestId?: string
-): ApiResponse {
+): IApiResponse {
   return {
     success: false,
     status: {
@@ -59,18 +59,18 @@ function generateRequestId(): string {
 /**
  * Error handling utilities
  */
-export function getErrorMessage(error: ApiResponse): string {
+export function getErrorMessage(error: IApiResponse): string {
   return error.error?.message || "An unknown error occurred";
 }
 
 export function getFieldError(
-  error: ApiResponse,
+  error: IApiResponse,
   field: string
 ): string | undefined {
   return error.error?.errors?.find((err) => err.field === field)?.message;
 }
 
-export function getFieldErrors(error: ApiResponse): Record<string, string> {
+export function getFieldErrors(error: IApiResponse): Record<string, string> {
   if (!error.error?.errors) return {};
 
   return error.error.errors.reduce((acc, err) => {
@@ -84,8 +84,8 @@ export function getFieldErrors(error: ApiResponse): Record<string, string> {
 /**
  * Type guard to check if response is successful
  */
-export function isSuccessResponse<T>(
-  response: ApiResponse<T>
-): response is ApiResponse<T> & { data: T } {
+export function isSuccessResponse<TData>(
+  response: IApiResponse<TData>
+): response is IApiResponse<TData> & { data: TData } {
   return response.success === true && response.data !== undefined;
 }

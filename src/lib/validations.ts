@@ -33,7 +33,7 @@ export const ScrewSchema = z.object({
   size: z.string().optional(),
 });
 
-export type ScrewDto = z.infer<typeof ScrewSchema>
+export type TScrewDto = z.infer<typeof ScrewSchema>
 
 // Define schemas for each form type
 export const createInstructionSchema = z.object({
@@ -41,7 +41,7 @@ export const createInstructionSchema = z.object({
   instruction: z.string().min(1, "Vui lòng nhập hướng dẫn"),
 });
 
-export type CreateInstructionDto = z.infer<typeof createInstructionSchema>;
+export type TCreateInstructionDto = z.infer<typeof createInstructionSchema>;
 
 export const createQuestionSchema = z.object({
   componentType: z.string().min(1, "Vui lòng chọn loại phụ kiện"),
@@ -49,4 +49,4 @@ export const createQuestionSchema = z.object({
   answer: z.string().min(1, "Vui lòng nhập câu trả lời"),
 });
 
-export type CreateQuestionDto = z.infer<typeof createQuestionSchema>;
+export type TCreateQuestionDto = z.infer<typeof createQuestionSchema>;

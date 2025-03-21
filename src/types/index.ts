@@ -1,10 +1,12 @@
-import SCHEMA from "@/lib/db";
+import DbSchema from "@/lib/db";
 
-export interface Env  {
+export interface IEnvironment  {
   DATABASE_URL: string;
+  REDIS_URL: string;
+  REDIS_TOKEN: string;
 }
 
-export interface ApiResponse<T = unknown> {
+export interface IApiResponse<TData = unknown> {
   success: boolean;
   status: {
     code: number;
@@ -12,29 +14,29 @@ export interface ApiResponse<T = unknown> {
   };
   requestId: string;
   timestamp: string;
-  data?: T;
-  error?: ApiError;
-  pagination?: PaginationInfo;
-  rateLimit?: RateLimitInfo;
+  data?: TData;
+  error?: IApiError;
+  pagination?: IPaginationInfo;
+  rateLimit?: IRateLimitInfo;
 }
 
-export interface ApiError {
+export interface IApiError {
   code: string;
   message: string;
   details?: unknown;
   path?: string;
   stack?: string;
-  errors?: ValidationError[];
+  errors?: IValidationError[];
 }
 
-export interface ValidationError {
+export interface IValidationError {
   field: string;
   message: string;
   code: string;
   value?: unknown;
 }
 
-export interface PaginationInfo {
+export interface IPaginationInfo {
   page: number;
   pageSize: number;
   totalItems: number;
@@ -45,85 +47,85 @@ export interface PaginationInfo {
   previousPageUrl?: string;
 }
 
-export interface RateLimitInfo {
+export interface IRateLimitInfo {
   limit: number;
   remaining: number;
   reset: number;
 }
 
-export interface ScrewData {
+export interface IScrewData {
   name: string;
   description: string;
-  videos: VideoData[];
+  videos: IVideoData[];
   type: number;
   material: number;
   stock: string;
-  others: OthersData[];
+  others: IOthersData[];
   price: string;
-  images: ImageData[];
+  images: IImageData[];
   note: string;
   size: number;
-  data?: ScrewJsonData;
+  data?: TScrewJsonData;
 }
 
-export type ScrewJsonData = Pick<ScrewData, "videos" | "images" | "others">;
+export type TScrewJsonData = Pick<IScrewData, "videos" | "images" | "others">;
 
-export interface ImageData {
+export interface IImageData {
   id: string;
   url: string;
 }
 
-export interface VideoData {
+export interface IVideoData {
   id: string;
   url: string;
 }
 
-export interface CategoryData {
+export interface ICategoryData {
   id: string;
   name: string;
   description: string;
 }
 
-export interface MaterialData {
+export interface IMaterialData {
   id: string;
   name: string;
   description: string;
 }
 
-export interface OthersData {
+export interface IOthersData {
   id: string;
   name: string;
   description: string;
 }
 
-export interface NoteData {
+export interface INoteData {
   id: string;
   descruption: string;
 }
 
-export type RecursivelyReplaceNullWithUndefined<T> = T extends null
+export type TRecursivelyReplaceNullWithUndefined<T> = T extends null
   ? undefined
   : T extends Date
   ? T
   : {
       [K in keyof T]: T[K] extends (infer U)[]
-        ? RecursivelyReplaceNullWithUndefined<U>[]
-        : RecursivelyReplaceNullWithUndefined<T[K]>;
+        ? TRecursivelyReplaceNullWithUndefined<U>[]
+        : TRecursivelyReplaceNullWithUndefined<T[K]>;
     };
 
-export type ImportResult = {
+export interface IImportResult {
   rowsCount: number;
 };
 
-export type ScrewTypeDto = {
+export interface IScrewTypeDto {
   id: number;
   name?: string;
 }
 
-export type ScrewMaterialDto = {
+export interface IScrewMaterialDto {
   id: number;
   name?: string;
 }
 
-export type ScrewEntity = Omit<typeof SCHEMA.SCREW.$inferSelect, "id">
-export type ServerCreateScrewDto = RecursivelyReplaceNullWithUndefined<typeof SCHEMA.SCREW.$inferInsert>
+export type TScrewEntity = Omit<typeof DbSchema.Screw.$inferSelect, "id">
+export type TServerCreateScrewDto = TRecursivelyReplaceNullWithUndefined<typeof DbSchema.Screw.$inferInsert>
