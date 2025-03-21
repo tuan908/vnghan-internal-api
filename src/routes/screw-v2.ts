@@ -1,8 +1,9 @@
 import {
-  DEFAULT_MATERIAL_ID,
-  DEFAULT_SIZE_ID,
-  DEFAULT_TYPE_ID,
-  ErrorCodes,
+    DEFAULT_MATERIAL_ID,
+    DEFAULT_SIZE_ID,
+    DEFAULT_TYPE_ID,
+    ErrorCodes,
+    PAGE_SIZE,
 } from "@/constants";
 import json from "@/i18n/locales/vi.json";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api-response";
@@ -10,14 +11,24 @@ import SCHEMA from "@/lib/db";
 import { nullsToUndefined } from "@/lib/utils";
 import { ScrewDto } from "@/lib/validations";
 import { ScrewTypeDto, ServerCreateScrewDto } from "@/types";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 
-const screwRouter = new Hono();
+const screwRouterV2 = new Hono();
 
-screwRouter
+screwRouterV2
   .get("/", async (c) => {
     const db = c.get("db");
+    const { page = "0" } = c.req.query();
+    const pageNumber = parseInt(page, 10) || 0;
+
+    const totalCountResult = await db
+      .select({ count: sql`count(*)`.mapWith(Number) })
+      .from(SCHEMA.SCREW)
+      .where(eq(SCHEMA.SCREW.isDeleted, false));
+
+    const totalCount = totalCountResult[0]?.count || 0;
+    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
     const screws = await db
       .select({
@@ -40,9 +51,23 @@ screwRouter
         eq(SCHEMA.SCREW.componentTypeId, SCHEMA.SCREW_TYPE.id)
       )
       .where(eq(SCHEMA.SCREW.isDeleted, false))
-      .orderBy(SCHEMA.SCREW.id);
+      .orderBy(SCHEMA.SCREW.id)
+      .limit(PAGE_SIZE)
+      .offset(pageNumber * PAGE_SIZE);
 
-    return c.json(createSuccessResponse(nullsToUndefined(screws)), 200);
+    return c.json(
+      createSuccessResponse(nullsToUndefined(screws), {
+        pagination: {
+          page: pageNumber,
+          totalPages,
+          totalItems: totalCount,
+          pageSize: PAGE_SIZE,
+          hasNextPage: pageNumber < totalPages - 1,
+          hasPreviousPage: pageNumber > 0,
+        },
+      }),
+      200
+    );
   })
   .post("/", async (c) => {
     const db = c.get("db");
@@ -156,4 +181,4 @@ screwRouter
     );
   });
 
-export default screwRouter;
+export default screwRouterV2;
