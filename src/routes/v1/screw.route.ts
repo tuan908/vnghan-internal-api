@@ -229,8 +229,8 @@ screwRouterV1
   .get("/types", cacheMiddleware, async (c) => {
     const db = c.get("db");
     const response = await db
-      .select({ id: DbSchema.Screw.id, name: DbSchema.Screw.name })
-      .from(DbSchema.Screw);
+      .select({ id: DbSchema.ScrewType.id, name: DbSchema.ScrewType.name })
+      .from(DbSchema.ScrewType);
     return c.json(
       createSuccessResponse<IScrewTypeDto[]>(nullsToUndefined(response)),
       200
@@ -240,10 +240,10 @@ screwRouterV1
     const db = c.get("db");
     const response = await db
       .select({
-        id: DbSchema.Screw.id,
-        name: DbSchema.Screw.name,
+        id: DbSchema.ScrewMaterial.id,
+        name: DbSchema.ScrewMaterial.name,
       })
-      .from(DbSchema.Screw);
+      .from(DbSchema.ScrewMaterial);
     return c.json(
       createSuccessResponse<IScrewMaterialDto[]>(nullsToUndefined(response)),
       200
