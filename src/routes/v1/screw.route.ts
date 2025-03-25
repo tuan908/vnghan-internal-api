@@ -1,5 +1,4 @@
 import {
-  CACHE_NAME_SCREWS,
   DEFAULT_MATERIAL_ID,
   DEFAULT_SIZE_ID,
   DEFAULT_TYPE_ID,
@@ -28,7 +27,6 @@ const cacheMiddleware = createCacheMiddlewareFactory({
   ttl: 300, // 5 minutes
   varyByHeaders: ["Accept-Language"],
   cacheControl: "public, max-age=300",
-  namespace: CACHE_NAME_SCREWS,
 });
 
 screwRouterV1.get("/", cacheMiddleware, async (c) => {
@@ -91,12 +89,7 @@ screwRouterV1.post("/", async (c) => {
   };
 
   const result = await db.insert(DbSchema.Screw).values(entity).execute();
-  const invalidateScrewsPromise = invalidateCache(
-    REDIS_URL,
-    REDIS_TOKEN,
-    `GET:/api/v1/screws`
-  );
-  const { error } = await tryCatch(invalidateScrewsPromise);
+  const { error } = await tryCatch(invalidateCache(REDIS_URL, REDIS_TOKEN));
   if (error)
     return c.json(
       createErrorResponse({
@@ -170,18 +163,14 @@ screwRouterV1.patch("/:id", async (c) => {
       404
     );
   }
-
-  const invalidateScrewPromise = invalidateCache(
-    REDIS_URL,
-    REDIS_TOKEN,
-    `GET:/api/v1/screws/${body.id!}`
-  );
-  const invalidateScrewsPromise = invalidateCache(
-    REDIS_URL,
-    REDIS_TOKEN,
-    `GET:/api/v1/screws`
-  );
-  await Promise.all([invalidateScrewPromise, invalidateScrewsPromise]);
+  const { error } = await tryCatch(invalidateCache(REDIS_URL, REDIS_TOKEN));
+  if (error)
+    return c.json(
+      createErrorResponse({
+        code: ErrorCodes.INTERNAL_SERVER_ERROR,
+        message: json.error.internalServerError,
+      })
+    );
 
   return c.json(createSuccessResponse({ data: result }), 200);
 });
@@ -224,17 +213,15 @@ screwRouterV1.delete("/:id", async (c) => {
     );
   }
 
-  const invalidateScrewTask = invalidateCache(
-    REDIS_URL,
-    REDIS_TOKEN,
-    `GET:/api/v1/screws/${body.id!}`
-  );
-  const invalidateScrewsTask = invalidateCache(
-    REDIS_URL,
-    REDIS_TOKEN,
-    `GET:/api/v1/screws`
-  );
-  await Promise.all([invalidateScrewTask, invalidateScrewsTask]);
+  const { error } = await tryCatch(invalidateCache(REDIS_URL, REDIS_TOKEN));
+  if (error)
+    return c.json(
+      createErrorResponse({
+        code: ErrorCodes.INTERNAL_SERVER_ERROR,
+        message: json.error.internalServerError,
+      })
+    );
+
   return c.json(createSuccessResponse({ data: result }), 200);
 });
 
